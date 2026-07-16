@@ -8,8 +8,22 @@ router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 
 @router.get("/", response_model=list[schemas.TaskResponse])
-def list_tasks(db: Session = Depends(get_db)):
-    return db.query(models.Task).all()
+def list_tasks(
+    completed: bool | None = None,
+    search: str | None = None,
+    db: Session = Depends(get_db),
+):
+    query = db.query(models.Task)
+
+    if completed is not None:
+        query = query.filter(models.Task.completed == completed)
+
+    if search:
+        query = query.filter(
+            models.Task.title.ilike(f"%{search}%")
+        )
+
+    return query.all()
 
 
 @router.get("/{task_id}", response_model=schemas.TaskResponse)
