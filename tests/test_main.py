@@ -173,3 +173,128 @@ def test_partially_update_task():
     assert updated_task["title"] == task_data["title"]
     assert updated_task["description"] == task_data["description"]
     assert updated_task["completed"] is True
+
+
+def test_get_task_by_id():
+    task_data = {
+        "title": "Buscar tarefa",
+        "description": "Testar consulta por ID",
+        "completed": False,
+    }
+
+    create_response = client.post(
+        "/tasks/",
+        json=task_data,
+    )
+
+    assert create_response.status_code == 201
+
+    created_task = create_response.json()
+    task_id = created_task["id"]
+
+    response = client.get(f"/tasks/{task_id}")
+
+    assert response.status_code == 200
+
+    task = response.json()
+
+    assert task["id"] == task_id
+    assert task["title"] == task_data["title"]
+    assert task["description"] == task_data["description"]
+    assert task["completed"] is False
+
+
+def test_update_task_with_put():
+    task_data = {
+        "title": "Tarefa original",
+        "description": "Descrição original",
+        "completed": False,
+    }
+
+    create_response = client.post(
+        "/tasks/",
+        json=task_data,
+    )
+
+    assert create_response.status_code == 201
+
+    task_id = create_response.json()["id"]
+
+    updated_data = {
+        "title": "Tarefa atualizada",
+        "description": "Descrição atualizada",
+        "completed": True,
+    }
+
+    response = client.put(
+        f"/tasks/{task_id}",
+        json=updated_data,
+    )
+
+    assert response.status_code == 200
+
+    updated_task = response.json()
+
+    assert updated_task["id"] == task_id
+    assert updated_task["title"] == updated_data["title"]
+    assert updated_task["description"] == updated_data["description"]
+    assert updated_task["completed"] is True
+
+
+def test_delete_task():
+    task_data = {
+        "title": "Tarefa para excluir",
+        "description": "Testar exclusão de tarefa",
+        "completed": False,
+    }
+
+    create_response = client.post(
+        "/tasks/",
+        json=task_data,
+    )
+
+    assert create_response.status_code == 201
+
+    task_id = create_response.json()["id"]
+
+    delete_response = client.delete(
+        f"/tasks/{task_id}"
+    )
+
+    assert delete_response.status_code == 200
+    assert delete_response.json() == {
+        "message": "Tarefa excluída com sucesso"
+    }
+
+    get_response = client.get(
+        f"/tasks/{task_id}"
+    )
+
+    assert get_response.status_code == 404
+    assert get_response.json() == {
+        "detail": "Tarefa não encontrada"
+    }
+
+
+def test_get_nonexistent_task():
+    response = client.get("/tasks/999999")
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": "Tarefa não encontrada"
+    }
+
+
+def test_create_task_with_invalid_title():
+    invalid_task = {
+        "title": "A",
+        "description": "Descrição válida",
+        "completed": False,
+    }
+
+    response = client.post(
+        "/tasks/",
+        json=invalid_task,
+    )
+
+    assert response.status_code == 422
