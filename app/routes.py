@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -11,6 +11,8 @@ router = APIRouter(prefix="/tasks", tags=["Tasks"])
 def list_tasks(
     completed: bool | None = None,
     search: str | None = None,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
     query = db.query(models.Task)
@@ -23,7 +25,7 @@ def list_tasks(
             models.Task.title.ilike(f"%{search}%")
         )
 
-    return query.all()
+    return query.offset(skip).limit(limit).all()
 
 
 @router.get("/{task_id}", response_model=schemas.TaskResponse)

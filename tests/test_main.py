@@ -124,3 +124,20 @@ def test_filter_and_search_tasks():
         and "sql" in task["title"].lower()
         for task in tasks
     )
+
+
+def test_task_pagination():
+    response = client.get(
+        "/tasks/",
+        params={
+            "skip": 0,
+            "limit": 2,
+        },
+    )
+
+    assert response.status_code == 200
+
+    tasks = response.json()
+
+    assert isinstance(tasks, list)
+    assert len(tasks) <= 2
