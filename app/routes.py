@@ -30,7 +30,11 @@ def list_tasks(
 
 @router.get("/{task_id}", response_model=schemas.TaskResponse)
 def get_task(task_id: int, db: Session = Depends(get_db)):
-    task = db.query(models.Task).filter(models.Task.id == task_id).first()
+    task = (
+        db.query(models.Task)
+        .filter(models.Task.id == task_id)
+        .first()
+    )
 
     if task is None:
         raise HTTPException(
@@ -69,7 +73,11 @@ def update_task(
     task_data: schemas.TaskCreate,
     db: Session = Depends(get_db),
 ):
-    task = db.query(models.Task).filter(models.Task.id == task_id).first()
+    task = (
+        db.query(models.Task)
+        .filter(models.Task.id == task_id)
+        .first()
+    )
 
     if task is None:
         raise HTTPException(
@@ -87,9 +95,45 @@ def update_task(
     return task
 
 
+@router.patch("/{task_id}", response_model=schemas.TaskResponse)
+def partially_update_task(
+    task_id: int,
+    task_data: schemas.TaskUpdate,
+    db: Session = Depends(get_db),
+):
+    task = (
+        db.query(models.Task)
+        .filter(models.Task.id == task_id)
+        .first()
+    )
+
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Tarefa não encontrada",
+        )
+
+    update_data = task_data.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(task, field, value)
+
+    db.commit()
+    db.refresh(task)
+
+    return task
+
+
 @router.delete("/{task_id}")
-def delete_task(task_id: int, db: Session = Depends(get_db)):
-    task = db.query(models.Task).filter(models.Task.id == task_id).first()
+def delete_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+):
+    task = (
+        db.query(models.Task)
+        .filter(models.Task.id == task_id)
+        .first()
+    )
 
     if task is None:
         raise HTTPException(

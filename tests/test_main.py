@@ -141,3 +141,35 @@ def test_task_pagination():
 
     assert isinstance(tasks, list)
     assert len(tasks) <= 2
+
+
+def test_partially_update_task():
+    task_data = {
+        "title": "Testar atualização parcial",
+        "description": "Tarefa criada para testar PATCH",
+        "completed": False,
+    }
+
+    create_response = client.post(
+        "/tasks/",
+        json=task_data,
+    )
+
+    assert create_response.status_code == 201
+
+    created_task = create_response.json()
+    task_id = created_task["id"]
+
+    update_response = client.patch(
+        f"/tasks/{task_id}",
+        json={"completed": True},
+    )
+
+    assert update_response.status_code == 200
+
+    updated_task = update_response.json()
+
+    assert updated_task["id"] == task_id
+    assert updated_task["title"] == task_data["title"]
+    assert updated_task["description"] == task_data["description"]
+    assert updated_task["completed"] is True
