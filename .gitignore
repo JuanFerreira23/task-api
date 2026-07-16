@@ -1,6 +1,26 @@
+# Ambiente virtual
 .venv/
+venv/
+
+# Arquivos Python
 __pycache__/
-*.pyc
+*.py[cod]
+
+# Variáveis de ambiente
 .env
-.vscode/
+
+# Banco SQLite local
 tasks.db
+*.db
+
+# Testes
+.pytest_cache/
+.coverage
+htmlcov/
+
+# VS Code
+.vscode/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
