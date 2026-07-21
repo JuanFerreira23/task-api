@@ -1,0 +1,31 @@
+services:
+  database:
+    image: postgres:17-alpine
+    container_name: task-api-database
+    environment:
+      POSTGRES_DB: task_api
+      POSTGRES_USER: task_user
+      POSTGRES_PASSWORD: task_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U task_user -d task_api
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: task-api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://task_user:task_password@database:5432/task_api
+    depends_on:
+      database:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
