@@ -2,25 +2,32 @@
 .venv/
 venv/
 
-# Arquivos Python
+# Cache do Python
 __pycache__/
 *.py[cod]
+*$py.class
 
 # Variáveis de ambiente
 .env
+.env.*
 
-# Banco SQLite local
-tasks.db
-*.db
-
-# Testes
+# Testes e cobertura
 .pytest_cache/
 .coverage
 htmlcov/
 
-# VS Code
+# Banco local
+*.db
+*.sqlite
+*.sqlite3
+
+# Editores
 .vscode/
+.idea/
 
 # Sistema operacional
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
